@@ -52,7 +52,10 @@ class Dataset():
         self.txt = txt_path
         self.img_path = img_path
         self.label_path = label_path
-        self.image_array,self.label_array ,self.classmap_array= self.read_jpg()
+        # self.image_array,self.label_array ,self.classmap_array= self.read_jpg()
+        self.image_array = np.load("./data/train_jpg.npy", allow_pickle= True)
+        self.label_array = np.load("./data/train_label.npy", allow_pickle= True)
+        self.classmap_array = np.load("./data/classmap.npy", allow_pickle= True)
 
     def read_jpg(self):
         image_list = []
@@ -80,11 +83,10 @@ class Dataset():
 
         image_array = np.array(image_list)
         label_array = np.array(label_list)
-        np.save("./VOCdevkit/VOC2012/jpg.npy",image_array)
-        np.save("./VOCdevkit/VOC2012/label.npy",label_array)
-        #classmap_array = self.convert_from_color_segmentation(label_array)
-        classmap_array = np.load("./VOCdevkit/VOC2012/classmap.npy",allow_pickle=True)
-        #classmap_array = classmap_array.astype(np.float32)
+        np.save("./data/train_jpg.npy",image_array)
+        np.save("./data/train_label.npy",label_array)
+        classmap_array = self.convert_from_color_segmentation(label_array)
+        #classmap_array = np.load("./VOCdevkit/VOC2012/classmap.npy",allow_pickle=True)
         return image_array , label_array, classmap_array
 
     def show_img(self):
@@ -110,8 +112,8 @@ class Dataset():
                 arr_2d[m] = i
             classmap_list.append(arr_2d)
         classmap_array = np.asarray(classmap_list)
-        np.save("./VOCdevkit/VOC2012/classmap.npy",classmap_array)
-        return classmap_array
+        np.save("./data/classmap.npy",classmap_array)
+        return classmap_array  
 
 if __name__ == "__main__":
     print(os.getcwd())

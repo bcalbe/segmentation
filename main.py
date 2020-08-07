@@ -11,12 +11,13 @@ txt_path = "./VOCdevkit/VOC2012/ImageSets/Segmentation/{}".format('train.txt' if
 
 def train(model,train_data,train_label):
     callback = [#tf.keras.callbacks.LearningRateScheduler(scheduler),
-                tf.keras.callbacks.EarlyStopping(monitor = 'val_loss',min_delta = 1e-2,patience = 2, verbose = 1)]
+                #tf.keras.callbacks.EarlyStopping(monitor = 'loss',min_delta = 1e-3,patience = 2, verbose = 1)
+                ]
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate = 1e-4),
     #loss=keras.losses.CategoricalCrossentropy(),  # 需要使用to_categorical
     loss='sparse_categorical_crossentropy',
     metrics=['accuracy'])
-    history = model.fit(train_data,train_label,batch_size = 16,epochs = 10,callbacks = callback)
+    history = model.fit(train_data,train_label,batch_size = 1,epochs = 10)
 
 def test(model,data):
     seg_img = np.zeros((128, 128,3))
@@ -45,11 +46,12 @@ def vis():
 
 
 if __name__ == "__main__":
-    vis()
+    #vis()
     train_dataset = D.Dataset(txt_path)
-    train_dataset.image_array
-    model = M.MyModel(21)
-    train(model,train_dataset.image_array,train_dataset.classmap_array[:,:,:,np.newaxis])
+    model = M.My_model()
+    #model.build(input_shape = (None,128,128,3))
+    train(model.Unet,train_dataset.image_array,train_dataset.classmap_array[:,:,:,np.newaxis])
+    model.summary()
     test(model,train_dataset.image_array[:5])
 
 
