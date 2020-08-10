@@ -10,48 +10,66 @@ txt_path = "./VOCdevkit/VOC2012/ImageSets/Segmentation/{}".format('train.txt' if
 
 
 def train(model,train_data,train_label):
-    callback = [#tf.keras.callbacks.LearningRateScheduler(scheduler),
-                #tf.keras.callbacks.EarlyStopping(monitor = 'loss',min_delta = 1e-3,patience = 2, verbose = 1)
+    def scheduler(epoch,lr):
+            if epoch <10:
+                return lr
+            elif epoch <20:
+                return lr/10
+            else:
+                return lr/1000 
+    callback = [tf.keras.callbacks.LearningRateScheduler(scheduler),
+                #tf.keras.callbacks.EarlyStopping(monitor = 'val_loss',min_delta = 1e-3,patience = 2, verbose = 1)
                 ]
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate = 1e-4),
     #loss=keras.losses.CategoricalCrossentropy(),  # 需要使用to_categorical
     loss='sparse_categorical_crossentropy',
     metrics=['accuracy'])
-    history = model.fit(train_data,train_label,batch_size = 1,epochs = 10)
+    history = model.fit(train_data,train_label,batch_size = 4,epochs = 20,callbacks = callback,validation_split = 0.1)
 
 def test(model,data):
-    seg_img = np.zeros((128, 128,3))
     predict = model.predict(data)
     predict = np.array(predict)
     np.save("./VOCdevkit/VOC2012/predict.npy",predict)
 
-def vis():
+def vis(image):
     predicts = np.load("./VOCdevkit/VOC2012/predict.npy",allow_pickle=True)
+    predicts = predicts.argmax(axis = -1)
+    predicts = class2png(predicts)
     plt.figure(figsize=(8,8))
     for n,predict in enumerate(predicts):
-        plt.subplot(5,1,n+1)
-        predict = predict.argmax(axis = -1)*255
+        plt.subplot(5,2,2*n+1)
+        #predict = predict.argmax(axis = -1)
         predict = predict.astype(np.uint8)
-        plt.imshow(predict*255,cmap = 'gray')
-
-    # plt.figure(figsize=(8,8))
-    # for n, image in enumerate(image):
-    #     plt.subplot(5,2,2*n+1)
-    #     plt.imshow(image/255)
-    #     plt.subplot(5,2,2*n+2)
-    #     plt.imshow(label[n])
-        #plt.imshow(label.astype())
+        plt.imshow(predict)
+        plt.subplot(5,2,2*n+2)
+        plt.imshow(image[n])
+        
     plt.show()
+
+def class2png(masks):
+    img_list = []
+    palette = D.pascal_palette()
+    for mask in masks:
+        seg_img = np.zeros((128, 128,3))
+        for k,v in palette.items():
+            m = np.array([mask == v])
+            m = np.squeeze(m)
+            seg_img[:,:,0] += ( m * k[0] ).astype('uint8')
+            seg_img[:,:,1] += ( m * k[1] ).astype('uint8')
+            seg_img[:,:,2] += ( m * k[2] ).astype('uint8')
+        img_list.append(seg_img)
+    return np.array(img_list)
+    
 
 
 
 if __name__ == "__main__":
-    #vis()
+    
     train_dataset = D.Dataset(txt_path)
+    vis(train_dataset.image_array[2:7])
     model = M.My_model()
     #model.build(input_shape = (None,128,128,3))
     train(model.Unet,train_dataset.image_array,train_dataset.classmap_array[:,:,:,np.newaxis])
-    model.summary()
-    test(model,train_dataset.image_array[:5])
+    test(model.Unet,train_dataset.image_array[2:7])
 
 

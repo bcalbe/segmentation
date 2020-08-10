@@ -52,14 +52,14 @@ class Dataset():
         self.txt = txt_path
         self.img_path = img_path
         self.label_path = label_path
-        # self.image_array,self.label_array ,self.classmap_array= self.read_jpg()
+        #self.image_array,self.label_array ,self.classmap_array= self.read_jpg()
         self.image_array = np.load("./data/train_jpg.npy", allow_pickle= True)
         self.label_array = np.load("./data/train_label.npy", allow_pickle= True)
         self.classmap_array = np.load("./data/classmap.npy", allow_pickle= True)
 
     def read_jpg(self):
         image_list = []
-        label_list = []
+        label_list = [] 
         classmap_list = []
 
         with open(txt_path) as file:

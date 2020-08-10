@@ -104,7 +104,7 @@ class My_model():
                                             strides=2,
                                             padding='same',
                                             kernel_initializer=initializer,
-                                            activation='tanh') # (bs, 128, 128, 3)
+                                            activation='softmax') # (bs, 128, 128, 3)
 
         inputs = tf.keras.layers.Input(shape=[128, 128, 3])
         x = inputs
