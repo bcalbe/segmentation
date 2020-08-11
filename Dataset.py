@@ -5,9 +5,9 @@ import numpy as np
 
 from PIL import Image
 
-
 is_train = True
 txt_path = "./VOCdevkit/VOC2012/ImageSets/Segmentation/{}".format('train.txt' if is_train else 'val.txt')
+image_size = (256,256)
 
 VOC_COLORMAP = [[0, 0, 0], [128, 0, 0], [0, 128, 0], [128, 128, 0],
                 [0, 0, 128], [128, 0, 128], [0, 128, 128], [128, 128, 128],
@@ -72,10 +72,10 @@ class Dataset():
                 image = tf.image.decode_jpeg(image)
                 label = tf.image.decode_png(label)
 
-                image = tf.image.resize(image,(128,128))/255
-                label = tf.image.resize(label,(128,128))
+                image = tf.image.resize(image,(image_size[0],image_size[1]))
+                label = tf.image.resize(label,(image_size[0],image_size[1]))
 
-                image = np.asarray(image)
+                image = np.asarray(image)/255
                 label = np.asarray(label)
 
                 image_list.append(image)
@@ -83,8 +83,8 @@ class Dataset():
 
         image_array = np.array(image_list)
         label_array = np.array(label_list)
-        np.save("./data/train_jpg.npy",image_array)
-        np.save("./data/train_label.npy",label_array)
+        np.save("./data/train_jpg_{}.npy".format(image_size[0]),image_array)
+        np.save("./data/train_label_{}.npy".format(image_size[0]),label_array)
         classmap_array = self.convert_from_color_segmentation(label_array)
         #classmap_array = np.load("./VOCdevkit/VOC2012/classmap.npy",allow_pickle=True)
         return image_array , label_array, classmap_array
@@ -112,7 +112,7 @@ class Dataset():
                 arr_2d[m] = i
             classmap_list.append(arr_2d)
         classmap_array = np.asarray(classmap_list)
-        np.save("./data/classmap.npy",classmap_array)
+        np.save("./data/classmap_{}.npy".format(image_size[0]),classmap_array)
         return classmap_array  
 
 if __name__ == "__main__":

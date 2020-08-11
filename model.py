@@ -93,7 +93,7 @@ class My_model():
     def get_unet(self,OUTPUT_CHANNELS = 21):
 
         up_stack = [
-                    self.upsample(512, 3, apply_dropout=True), # (bs, 8, 8, 1024)
+                    self.upsample(512, apply_dropout=False), # (bs, 8, 8, 1024) for input_shape(128,128)
                     self.upsample(256, 3), # (bs, 16, 16, 1024)
                     self.upsample(128, 3), # (bs, 32, 32, 512)
                     self.upsample(64, 3), # (bs, 64, 64, 256)
@@ -106,7 +106,7 @@ class My_model():
                                             kernel_initializer=initializer,
                                             activation='softmax') # (bs, 128, 128, 3)
 
-        inputs = tf.keras.layers.Input(shape=[128, 128, 3])
+        inputs = tf.keras.layers.Input(shape=[image_shape[0], image_shape[1], 3])
         x = inputs
         
         #downsample
@@ -130,4 +130,5 @@ if __name__ == "__main__":
     # model.summary()
     model = My_model()
     model.Unet.summary()
+    tf.keras.utils.plot_model(model.Unet, "Unet.png", show_shapes=True)
     
